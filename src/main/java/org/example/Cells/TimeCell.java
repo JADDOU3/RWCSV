@@ -13,6 +13,12 @@ public class TimeCell implements Cell<TimeCell, Time>{
         return time;
     }
 
+
+    @Override
+    public String getType() {
+        return "time";
+    }
+
     @Override
     public int compare(TimeCell cell1) {
         int comparesion = time.compareTo(cell1.getValue());

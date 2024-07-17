@@ -22,6 +22,13 @@ public class BigDecimalCell implements Cell<BigDecimalCell,BigDecimal> {
         return value;
     }
 
+
+
+    @Override
+    public String getType() {
+        return "bigdecimal";
+    }
+
     public BigDecimalCell(String a){
         value = new BigDecimal(a);
     }

@@ -6,7 +6,7 @@ public class Context {
     private Scanner scanner = new Scanner(System.in);
     private State currentState;
 
-    Scanner getScanner(){
+    public Scanner getScanner(){
         return scanner;
     }
 
@@ -17,5 +17,6 @@ public class Context {
     public void handleInput(){
         currentState.handleInput();
     }
+
 
 }

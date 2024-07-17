@@ -16,6 +16,12 @@ public class StringCell implements Cell<StringCell,String>{
 
 
     @Override
+    public String getType() {
+        return "string";
+    }
+
+
+    @Override
     public int compare(StringCell cell1) {
         int comparesion = value.compareTo(cell1.getValue());
         if(comparesion > 0){

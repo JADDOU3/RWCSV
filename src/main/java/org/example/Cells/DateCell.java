@@ -38,7 +38,10 @@ public class DateCell implements Cell<DateCell , String>{
     }
 
 
-
+    @Override
+    public String getType() {
+        return "date";
+    }
 
 
 }

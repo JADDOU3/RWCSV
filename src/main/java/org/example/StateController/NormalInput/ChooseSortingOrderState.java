@@ -1,10 +1,13 @@
-package org.example.StateController;
+package org.example.StateController.NormalInput;
 
-import org.example.CSVFileRW;
+import org.example.ReadWrite.CSVFileRW;
+import org.example.StateController.Context;
+import org.example.StateController.ExitState;
+import org.example.StateController.State;
 
 import java.util.Scanner;
 
-public class ChooseSortingOrderState implements State{
+public class ChooseSortingOrderState implements State {
     private Context context;
 
     ChooseSortingOrderState(Context context){
