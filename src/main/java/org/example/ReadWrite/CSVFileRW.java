@@ -2,7 +2,6 @@ package org.example.ReadWrite;
 
 import org.example.Cells.*;
 import org.example.Cells.Row;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -10,6 +9,8 @@ import java.io.FileWriter;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -124,12 +125,11 @@ public class CSVFileRW {
         sortAscending();
     }
 
-    private static String type = "string";
 
     public static void excuteRule(String[] arr){
         List<Row> filteredList = new ArrayList<>();
         filteredList.add(list.get(0));
-
+        String type = "string";
         for(Row r : list) {
             Stack<String> stack = new Stack<>();
             for (String s : arr) {
@@ -139,13 +139,42 @@ public class CSVFileRW {
                         stack.add(String.valueOf(r.cellList.get(getColumnIndexByName(s)).getValue()));
                     } else{
                         stack.add(s);
+
                     }
                 }
                 else{
-                    String right = stack.pop();
-                    String left = stack.pop();
-                    boolean result = excuteRuleHelper(left, right, s);
-                    stack.add(String.valueOf(result));
+                    switch (type) {
+                        case "bigdecimal":
+                            BigDecimal rightBD = new BigDecimal(stack.pop());
+                            BigDecimal leftBD = new BigDecimal(stack.pop());
+                            boolean resultBD = executeRuleHelper(leftBD, rightBD, s);
+                            stack.add(String.valueOf(resultBD));
+                            break;
+                        case "date":
+                            Date rightDate = null;
+                            Date leftDate = null;
+                            try {
+                                rightDate = convertToSqlDate(stack.pop());
+                                leftDate = convertToSqlDate(stack.pop());
+                            } catch (ParseException e) {
+                                throw new RuntimeException(e);
+                            }
+                            boolean resultDate = executeRuleHelper(leftDate, rightDate, s);
+                            stack.add(String.valueOf(resultDate));
+                            break;
+                        case "time":
+                            Time rightTime = Time.valueOf(stack.pop());
+                            Time leftTime = Time.valueOf(stack.pop());
+                            boolean resultTime = executeRuleHelper(leftTime, rightTime, s);
+                            stack.add(String.valueOf(resultTime));
+                            break;
+                        default:
+                            String rightStr = stack.pop();
+                            String leftStr = stack.pop();
+                            boolean resultStr = executeRuleHelper(leftStr, rightStr, s);
+                            stack.add(String.valueOf(resultStr));
+                            break;
+                    }
                 }
             }
             if(stack.size() == 1 && Boolean.parseBoolean(String.valueOf(stack.pop())))
@@ -155,75 +184,31 @@ public class CSVFileRW {
         sqlSort();
     }
 
-    public static  boolean  excuteRuleHelper(String left , String right , String operation){
+    private static java.sql.Date convertToSqlDate(String dateStr) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        java.util.Date utilDate = sdf.parse(dateStr);
+        return new java.sql.Date(utilDate.getTime());
+    }
+
+    public static <T extends Comparable<T>> boolean  executeRuleHelper(T left , T right , String operation){
         switch (operation){
-            case ">" : return greaterOperation(left , right);
+            case ">" : return left.compareTo(right) > 0;
 
-            case ">=": return greaterEqualOperation(left, right);
+            case ">=": return left.compareTo(right) >= 0;
 
-            case "<": return lessOperation(left, right);
+            case "<": return left.compareTo(right) < 0;
 
-            case "<=": return lessEqualOperation(left, right);
+            case "<=": return left.compareTo(right) <= 0;
 
             case "=": return left.equals(right);
-            case "*":   return ( Boolean.parseBoolean(left) && Boolean.parseBoolean(right));
-            case "+": return ( Boolean.parseBoolean(left) || Boolean.parseBoolean(right));
+            case "*":   return ( Boolean.parseBoolean((String)left) && Boolean.parseBoolean((String)right));
+            case "+": return ( Boolean.parseBoolean((String)left) || Boolean.parseBoolean((String)right));
             default:
                 throw new IllegalArgumentException("Invalid operation: " + operation);
         }
     }
 
-    public static boolean greaterOperation(String left , String right){
-            switch (type){
-                case "date" :
-                  return Date.valueOf(left).compareTo(Date.valueOf(right)) > 0;
-                case "time" :
-                    return Time.valueOf(left).compareTo(Time.valueOf(right)) > 0;
-                case "bigdecimal" :
-                    return  new BigDecimal(left).compareTo(new BigDecimal(right)) > 0;
-                default:
-                    return left.compareTo(right) > 0;
-            }
-    }
 
-    public static boolean greaterEqualOperation(String left , String right){
-        switch (type){
-            case "date" :
-                return Date.valueOf(left).compareTo(Date.valueOf(right)) >= 0;
-            case "time" :
-                return Time.valueOf(left).compareTo(Time.valueOf(right)) >= 0;
-            case "bigdecimal" :
-               return  new BigDecimal(left).compareTo(new BigDecimal(right)) >= 0;
-            default:
-                return left.compareTo(right) >= 0;
-        }
-    }
-
-    public static boolean lessOperation(String left , String right){
-        switch (type){
-            case "date" :
-                return Date.valueOf(left).compareTo(Date.valueOf(right)) < 0;
-            case "time" :
-                return Time.valueOf(left).compareTo(Time.valueOf(right)) < 0;
-            case "bigdecimal" :
-                return  new BigDecimal(left).compareTo(new BigDecimal(right)) < 0;
-            default:
-                return left.compareTo(right) < 0;
-        }
-    }
-
-    public static boolean lessEqualOperation(String left , String right){
-        switch (type){
-            case "date" :
-                return Date.valueOf(left).compareTo(Date.valueOf(right)) <= 0;
-            case "time" :
-                return Time.valueOf(left).compareTo(Time.valueOf(right)) <= 0;
-            case "bigdecimal" :
-                return  new BigDecimal(left).compareTo(new BigDecimal(right)) <= 0;
-            default:
-                return left.compareTo(right) <= 0;
-        }
-    }
 
 
     public static boolean isColumn(String s){

@@ -24,7 +24,7 @@ public class SQLInputState implements State {
             context.setCurrentState(new ExitState(context));
         }
         else {
-            if(!input.matches("select\\s+([*\\w+]+\\s+)+[\\w\\\\:]+.csv\\s+where\\s+([\\w\\d>*=<\\()+]+\\s+)+orderby\\s+\\w+")){
+            if(!input.matches("select\\s+([*\\w+]+\\s+)+[\\w\\\\:]+.csv\\s+where\\s+([\\w\\d>*=<\\()+/]+\\s+)+orderby\\s+\\w+")){
                 System.out.println("invalid Query please enter again");
                 context.handleInput();
             }
